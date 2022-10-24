@@ -1,0 +1,3 @@
+@echo Compiling Python file to EXE...
+pyinstaller.exe --onefile sightings.py
+@pause

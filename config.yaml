@@ -1,0 +1,8 @@
+ffmpeg: "C:\\AMOS\\ffmpeg\\bin\\ffmpeg.exe"
+ffprobe: "C:\\AMOS\\ffmpeg\\bin\\ffprobe.exe"
+older_than: 30
+source: "C:\\Data\\"
+target: "D:\\Data\\"
+video:
+    codec: rawvideo
+    pixel_format: gray
