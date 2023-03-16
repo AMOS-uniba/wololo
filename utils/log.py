@@ -1,6 +1,6 @@
 import logging
 import time
-import colour as c
+from utils import colour as c
 
 
 class SightingFormatter(logging.Formatter):
@@ -18,12 +18,12 @@ class SightingFormatter(logging.Formatter):
 
         return super().format(record)
 
-    def formatTime(self, record, format):
+    def formatTime(self, record, fmt) -> str:
         ct = self.converter(record.created)
         return f"{time.strftime('%H:%M:%S', ct)}.{int(record.msecs):03d}"
 
 
-def setupLog(name, **kwargs):
+def setup(name, **kwargs):
     formatter = SightingFormatter()
 
     handler = logging.StreamHandler()
