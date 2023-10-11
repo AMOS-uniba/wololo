@@ -12,4 +12,4 @@
 
 from classes.tree import DirectoryConvertor
 
-DirectoryConvertor.run()
+DirectoryConvertor().run()

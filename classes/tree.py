@@ -1,15 +1,17 @@
 import argparse
+import logging
+
 import yaml
 import dotmap
 import datetime
 from pathlib import Path
 
-from utils import colour as c, log
+from utils import colour as c, logger
 from utils.functions import format_boolean
 from argparsedirs import ReadableDir, WriteableDir
 from classes.processor import FileProcessor
 
-logger = log.setup('root')
+log = logger.setup(__name__)
 
 
 class DirectoryConvertor:
@@ -24,22 +26,22 @@ class DirectoryConvertor:
         self.create_argparser()
         self.load_config()
 
-        logger.info("AMOS sighting synchronization and conversion utility")
-        logger.info(f"Source directory {c.path(str(self.source_dir))}, "
+        log.info("AMOS sighting synchronization and conversion utility")
+        log.info(f"Source directory {c.path(str(self.source_dir))}, "
                     f"target directory {c.path(str(self.target_dir))}")
 
         if self.config.video.convert:
-            logger.info(f"Videos will be converted to {c.param(self.config.video.codec)}, "
+            log.info(f"Videos will be converted to {c.param(self.config.video.codec)}, "
                         f"pixel format {c.param(self.config.video.pixel_format)}")
         else:
-            logger.info(f"Videos {c.warn('will not')} be converted, only copied")
+            log.info(f"Videos {c.warn('will not')} be converted, only copied")
 
-        logger.info(f"This is a {c.ok('real run') if self.real_run else c.warn('dry run')}: "
+        log.info(f"This is a {c.ok('real run') if self.real_run else c.warn('dry run')}: "
                     f"copy files: {format_boolean(self.config.copy_files)}, "
                     f"delete old files: {format_boolean(self.config.delete_files)}")
 
         if self.args.debug:
-            logger.info("Config is")
+            log.info("Config is")
             self.config.pprint()
 
         self.processor = FileProcessor(self.real_run, ffmpeg_path=self.config.ffmpeg, debug=self.args.debug)
@@ -58,7 +60,7 @@ class DirectoryConvertor:
 
     @staticmethod
     def _warn_override(config_param, args_param):
-        logger.warning(f"Overriding source {c.param(config_param)} from command line to {c.param(args_param)}")
+        log.warning(f"Overriding source {c.param(config_param)} from command line to {c.param(args_param)}")
 
     def load_config(self):
         self.config = dotmap.DotMap(yaml.safe_load(self.args.ini), _dynamic=False)
@@ -85,7 +87,7 @@ class DirectoryConvertor:
         self.real_run = not (self.config.copy_files or self.config.delete_files)
 
     def run(self):
-        start = datetime.datetime.utcnow()
+        start = datetime.datetime.now(datetime.UTC)
         files = self.source_dir.rglob('*.*')
         processed: int = 0
         process_failed: int = 0
@@ -102,14 +104,14 @@ class DirectoryConvertor:
             target_dir = Path(str(file.parent).replace(str(self.source_dir), str(self.target_dir)))
             target_path = Path(target_dir / file.name)
             try:
-                source_age = datetime.datetime.utcnow() - datetime.datetime.fromtimestamp(file.stat().st_mtime)
+                source_age = datetime.datetime.now(datetime.UTC) - datetime.datetime.fromtimestamp(file.stat().st_mtime)
 
                 inspected += 1
                 inspected_size += source_path.stat().st_size
 
                 is_updated = False
                 if is_copied := target_path.exists():
-                    target_age = datetime.datetime.utcnow() - \
+                    target_age = datetime.datetime.now(datetime.UTC) - \
                                  datetime.datetime.fromtimestamp(target_path.stat().st_mtime)
                     if source_age < target_age:
                         is_updated = True
@@ -119,7 +121,7 @@ class DirectoryConvertor:
                 should_process = not is_copied or is_updated and self.config.copy_files
                 should_delete = is_old and is_copied and self.config.delete_files
 
-                logger.info(f"{c.path(file):<85} age {c.num(source_age.days):>13} d, "
+                log.info(f"{c.path(file):<85} age {c.num(source_age.days):>13} d, "
                             f"old: {format_boolean(is_old)} "
                             f"copied: {format_boolean(is_copied)} "
                             f"newer: {format_boolean(is_updated)} "
@@ -136,7 +138,7 @@ class DirectoryConvertor:
                         process_failed += 1
                         raise e
                     except OSError as e:
-                        logger.error(f"Processing failed: {e}")
+                        log.error(f"Processing failed: {e}")
                         process_failed += 1
 
                 if should_delete:
@@ -147,24 +149,24 @@ class DirectoryConvertor:
                         delete_failed += 1
                         raise e
                     except OSError as e:
-                        logger.error(f"Deletion failed: {e}")
+                        log.error(f"Deletion failed: {e}")
                         delete_failed += 1
             except FileNotFoundError as e:
-                logger.error(f"File not found, skipping: {e}")
+                log.error(f"File not found, skipping: {e}")
 
-        logger.info(f"{c.num(inspected)} files ({c.num(f'{inspected_size / 2**20:6.0f}')} MB) inspected")
-        logger.info(f"  - {c.num(processed)} ({c.num(f'{processed_size / 2**20:6.0f}')} MB) "
+        log.info(f"{c.num(inspected)} files ({c.num(f'{inspected_size / 2 ** 20:6.0f}')} MB) inspected")
+        log.info(f"  - {c.num(processed)} ({c.num(f'{processed_size / 2 ** 20:6.0f}')} MB) "
                     f"{'copied' if self.config.copy_files else 'to copy'} "
                     f"({(c.ok if process_failed == 0 else c.err)(process_failed)} failed)")
-        logger.info(f"     - {c.num(f'{reclaimed_size / 2 ** 20:6.0f}')} MB reclaimed by reencoding")
-        logger.info(f"  - {c.num(deleted)} ({c.num(f'{deleted_size / 2**20:6.0f}')} MB) "
+        log.info(f"     - {c.num(f'{reclaimed_size / 2 ** 20:6.0f}')} MB reclaimed by reencoding")
+        log.info(f"  - {c.num(deleted)} ({c.num(f'{deleted_size / 2 ** 20:6.0f}')} MB) "
                     f"{'to delete' if self.real_run else 'deleted'} "
                     f"({(c.ok if delete_failed == 0 else c.err)(delete_failed)} failed)")
 
         if not self.real_run:
-            logger.info(f"This was a {c.warn('dry run')}, no files were actually copied or deleted")
+            log.info(f"This was a {c.warn('dry run')}, no files were actually copied or deleted")
 
-        logger.info(f"Finished in {datetime.datetime.utcnow() - start}")
+        log.info(f"Finished in {datetime.datetime.now(datetime.UTC) - start}")
 
     def delete(self, path):
         """ Conditionally delete the specified file """
@@ -172,7 +174,7 @@ class DirectoryConvertor:
 
     def process(self, source, target):
         """ Conditionally process the specified file: convert the video and copy all other files """
-        logger.debug(f"{'Processing' if self.config.copy_files else 'Would process'} file {c.path(str(source))}")
+        log.debug(f"{'Processing' if self.config.copy_files else 'Would process'} file {c.path(str(source))}")
 
         if source.suffix == '.avi' and self.config.video.convert:
             return self.processor.convert_avi(source, target,

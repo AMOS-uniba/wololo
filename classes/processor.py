@@ -1,12 +1,11 @@
-import log
 import shutil
 import subprocess
 
 from pathlib import Path
 
-from utils import colour as c
+from utils import colour as c, logger
 
-logger = log.setup('root')
+log = logger.setup(__name__)
 
 
 class FileProcessor:
@@ -24,30 +23,30 @@ class FileProcessor:
 
             if pixel_format == b'Y16 ':
                 if self.real_run:
-                    logger.warning(f"File {c.path(str(path))}: video header is {c.param('Y16 ')}, "
+                    log.warning(f"File {c.path(str(path))}: video header is {c.param('Y16 ')}, "
                                    f"correcting to {c.param('Y800')}")
                     file.seek(188)
                     file.write(b'Y800')
                 else:
-                    logger.warning(f"File {c.path(str(path))}: video header is {c.param('Y16 ')}, not correcting")
+                    log.warning(f"File {c.path(str(path))}: video header is {c.param('Y16 ')}, not correcting")
 
     def delete(self, path: Path) -> int:
         """ Conditionally delete the specified file """
-        logger.info(f"{'Deleting' if self.real_run else 'Would delete'} file {c.path(str(path))}")
+        log.info(f"{'Deleting' if self.real_run else 'Would delete'} file {c.path(str(path))}")
         if self.real_run:
             try:
                 size = path.stat().st_size
                 path.unlink()
                 return size
             except OSError as e:
-                logger.error(f"Could not delete {str(path)}: {e.strerror}")
+                log.error(f"Could not delete {str(path)}: {e.strerror}")
                 raise e
         else:
             return 0
 
     def copy(self, source: Path, target: Path) -> 0:
         """ Conditionally copy the specified file <source> to <target> """
-        logger.info(f"{'Copying' if self.real_run else 'Would copy'} {c.path(source)} to {c.path(target)}")
+        log.info(f"{'Copying' if self.real_run else 'Would copy'} {c.path(source)} to {c.path(target)}")
 
         if self.real_run:
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -83,7 +82,7 @@ class FileProcessor:
             str(target),  # output file
         ]
 
-        logger.info(f"{'Converting' if self.real_run else 'Would convert'} {c.path(str(source))} to {c.path(target)}")
+        log.info(f"{'Converting' if self.real_run else 'Would convert'} {c.path(str(source))} to {c.path(target)}")
 
         if self.real_run:
             cp = subprocess.run(command)
@@ -92,5 +91,5 @@ class FileProcessor:
 
             return source.stat().st_size - target.stat().st_size
         else:
-            logger.info(f"Would run {' '.join(command)}")
+            log.info(f"Would run {' '.join(command)}")
             return 0

@@ -4,6 +4,7 @@ from colorama import Fore, Style
 
 colorama.init()
 
+
 def colour(what, how):
     return "{}{}{}".format(how, what, Style.RESET_ALL)
 

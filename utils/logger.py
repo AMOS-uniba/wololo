@@ -4,18 +4,17 @@ from utils import colour as c
 
 
 class SightingFormatter(logging.Formatter):
-    def __init__(self):
-        super().__init__('{message}', "%H:%M:%S", '{')
+    def __init__(self, fmt, timefmt, fmtc):
+        super().__init__(fmt, timefmt, fmtc)
 
     def format(self, record):
         record.levelname = {
             'DEBUG':    c.debug,
             'INFO':     c.none,
             'WARNING':  c.warn,
-            'ERROR':    c.err,
+            'ERROR':    c.ok,
             'CRITICAL': c.critical,
         }[record.levelname](record.levelname[:3])
-
         return super().format(record)
 
     def formatTime(self, record, fmt) -> str:
@@ -23,10 +22,13 @@ class SightingFormatter(logging.Formatter):
         return f"{time.strftime('%H:%M:%S', ct)}.{int(record.msecs):03d}"
 
 
-def setup(name, **kwargs):
-    formatter = SightingFormatter()
+def setup(name, *, output=None, fmt='{asctime} [{levelname}] {message}', timefmt='%Y-%m-%d %H:%M:%S', fmtc='{'):
+    formatter = SightingFormatter(fmt='[{asctime}] {message}', timefmt=timefmt, fmtc=fmtc)
 
-    handler = logging.StreamHandler()
+    if type(output) == str:
+        handler = logging.FileHandler(output)
+    else:
+        handler = logging.StreamHandler()
     handler.setFormatter(formatter)
 
     log = logging.getLogger(name)
