@@ -1,12 +1,8 @@
-import colorama
 from colorama import Fore, Style
 
 
-colorama.init()
-
-
 def colour(what, how):
-    return "{}{}{}".format(how, what, Style.RESET_ALL)
+    return f"{how}{what}{Style.RESET_ALL}"
 
 
 def ok(what):
@@ -14,19 +10,19 @@ def ok(what):
 
 
 def num(what):
-    return colour(what, Fore.LIGHTMAGENTA_EX)
+    return colour(what, Fore.CYAN)
 
 
 def act(what):
-    return colour(what, Fore.LIGHTGREEN_EX)
+    return colour(what, Fore.YELLOW)
 
 
 def warn(what):
-    return colour(what, Fore.LIGHTYELLOW_EX)
+    return colour(what, Fore.YELLOW)
 
 
 def err(what):
-    return colour(what, Fore.LIGHTRED_EX)
+    return colour(what, Fore.RED)
 
 
 def critical(what):
@@ -34,7 +30,7 @@ def critical(what):
 
 
 def path(what):
-    return colour(what, Fore.LIGHTCYAN_EX)
+    return colour(what, Fore.LIGHTRED_EX)
 
 
 def name(what):
@@ -45,17 +41,10 @@ def over(what):
     return colour(what, Fore.LIGHTGREEN_EX)
 
 
-def codec(what):
+def script(what):
     return colour(what, Fore.LIGHTMAGENTA_EX)
 
 
 def param(what):
-    return colour(what, Fore.LIGHTYELLOW_EX)
+    return colour(what, Fore.LIGHTBLUE_EX)
 
-
-def debug(what):
-    return colour(what, Fore.LIGHTBLACK_EX)
-
-
-def none(what):
-    return colour(what, Fore.WHITE)

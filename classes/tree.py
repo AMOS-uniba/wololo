@@ -1,17 +1,37 @@
 import argparse
-import logging
-
-import yaml
-import dotmap
 import datetime
+import logging
 from pathlib import Path
 
-from utils import colour as c, logger
-from utils.functions import format_boolean
+import dotmap
+import yaml
+import scalyca
 from argparsedirs import ReadableDir, WriteableDir
-from classes.processor import FileProcessor
 
-log = logger.setup(__name__)
+from classes.processor import FileProcessor
+from scalyca import colour as c
+from utils.functions import format_boolean
+
+
+log = logging.getLogger(__name__)
+
+
+class TreeConvertor(scalyca.Scalyca):
+    app_name = "Tree video convertor"
+
+    def __init__(self):
+        super().__init__()
+
+    def add_arguments(self):
+        self.add_argument('-s', '--source', action=ReadableDir, help="Override <source> directory")
+        self.add_argument('-t', '--target', action=WriteableDir, help="Override <target> directory")
+        self.add_argument('-o', '--older-than', type=int,
+                          help="Delete files older than this many days. Overrides <older_than>")
+        self.add_argument('-C', '--copy', action='store_true', help="Copy or convert files")
+        self.add_argument('-D', '--delete', action='store_true', help="Delete files older than <older_than>")
+        self.add_argument('-V', '--convert-video', action='store_true', help="Convert video files")
+
+
 
 
 class DirectoryConvertor:

@@ -1,11 +1,12 @@
 import shutil
 import subprocess
+import logging
 
 from pathlib import Path
 
-from utils import colour as c, logger
+from scalyca import colour as c
 
-log = logger.setup(__name__)
+log = logging.getLogger(__name__)
 
 
 class FileProcessor:
@@ -14,7 +15,7 @@ class FileProcessor:
         self.ffmpeg = ffmpeg_path
         self.debug = debug
 
-    def correct_video_header(self, path):
+    def correct_video_header(self, path: Path):
         """ Inspect the video header for the faulty "Y16 " and if found, change it to "Y800" """
 
         with open(path, 'r+b') as file:
@@ -24,14 +25,17 @@ class FileProcessor:
             if pixel_format == b'Y16 ':
                 if self.real_run:
                     log.warning(f"File {c.path(str(path))}: video header is {c.param('Y16 ')}, "
-                                   f"correcting to {c.param('Y800')}")
+                                f"correcting to {c.param('Y800')}")
                     file.seek(188)
                     file.write(b'Y800')
                 else:
                     log.warning(f"File {c.path(str(path))}: video header is {c.param('Y16 ')}, not correcting")
 
     def delete(self, path: Path) -> int:
-        """ Conditionally delete the specified file """
+        """
+        Conditionally delete the specified file
+        Returns: number of bytes reclaimed
+        """
         log.info(f"{'Deleting' if self.real_run else 'Would delete'} file {c.path(str(path))}")
         if self.real_run:
             try:
@@ -45,7 +49,10 @@ class FileProcessor:
             return 0
 
     def copy(self, source: Path, target: Path) -> 0:
-        """ Conditionally copy the specified file <source> to <target> """
+        """
+        Conditionally copy the specified file <source> to <target>
+        Returns: number of bytes reclaimed (trivially always 0)
+        """
         log.info(f"{'Copying' if self.real_run else 'Would copy'} {c.path(source)} to {c.path(target)}")
 
         if self.real_run:
@@ -57,7 +64,10 @@ class FileProcessor:
     def convert_avi(self, source, target, *,
                     codec: str = 'rawvideo',
                     pixel_format: str = 'gray') -> int:
-        """ Conditionally convert the specified AVI file to the new format using ffmpeg """
+        """
+        Conditionally convert the specified AVI file to the new format using ffmpeg
+        Returns: number of bytes reclaimed by transcoding
+        """
         if not source.exists():
             return 0
 
@@ -87,7 +97,7 @@ class FileProcessor:
         if self.real_run:
             cp = subprocess.run(command)
             if cp.returncode != 0:
-                raise OSError()
+                raise OSError(f"subprocess.run failed for command {command}")
 
             return source.stat().st_size - target.stat().st_size
         else:

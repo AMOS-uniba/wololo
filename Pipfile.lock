@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e12694278a750da8de5dcee3aea6a1b1b99dfd6f6b4f682645da319051d769af"
+            "sha256": "873d2c013de22afc4dbc323ed177e84163555e8daf53e51603b5b78c9f9e5c6b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -47,6 +47,14 @@
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6'",
             "version": "==0.4.6"
         },
+        "contextlib2": {
+            "hashes": [
+                "sha256:3fbdb64466afd23abaf6c977627b75b6139a5a3e8ce38405c5b413aed7a0471f",
+                "sha256:ab1e2bfe1d01d968e1b7e8d9023bc51ef3509bba217bb730cee3827e1ee82869"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==21.6.0"
+        },
         "dotmap": {
             "hashes": [
                 "sha256:5821a7933f075fb47563417c0e92e0b7c031158b4c9a6a7e56163479b658b368",
@@ -62,6 +70,13 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==23.2"
+        },
+        "pathlib": {
+            "hashes": [
+                "sha256:6940718dfc3eff4258203ad5021090933e5c04707d5ca8cc9e73c94a7894ea9f",
+                "sha256:f35f95ab8b0f59e6d354090350b44a80a80635d22efdedfa84c7ad1cf0a74147"
+            ],
+            "version": "==1.0.1"
         },
         "pefile": {
             "hashes": [
@@ -162,6 +177,21 @@
             "index": "pypi",
             "markers": "python_version >= '3.6'",
             "version": "==6.0.1"
+        },
+        "scalyca": {
+            "hashes": [
+                "sha256:4edaa4eb748e4e2ec6aa871c8feb61bb43f0b73c3fccbaac5ac40135ff95604c",
+                "sha256:e9c4cc49e2f045d01860280a2f34b0f51a669726ba9687285af26dfae1b99f39"
+            ],
+            "index": "pypi",
+            "version": "==0.0.6"
+        },
+        "schema": {
+            "hashes": [
+                "sha256:f06717112c61895cabc4707752b88716e8420a8819d71404501e114f91043197",
+                "sha256:f3ffdeeada09ec34bf40d7d79996d9f7175db93b7a5065de0faa7f41083c1e6c"
+            ],
+            "version": "==0.7.5"
         },
         "setuptools": {
             "hashes": [
