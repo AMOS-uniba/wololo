@@ -10,6 +10,6 @@
     see pyinstaller documentation.
 """
 
-from classes.tree import DirectoryConvertor
+from classes.tree import TreeConvertor
 
-DirectoryConvertor().run()
+TreeConvertor().run()

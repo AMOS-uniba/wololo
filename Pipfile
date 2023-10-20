@@ -9,7 +9,7 @@ argparsedirs = "*"
 dotmap = "*"
 colorama = "*"
 pyinstaller = "*"
-scalyca = "*"
+schema = "*"
 
 [dev-packages]
 "flake8" = "*"
