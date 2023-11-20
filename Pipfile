@@ -8,12 +8,12 @@ pyyaml = "*"
 argparsedirs = "*"
 dotmap = "*"
 colorama = "*"
-pyinstaller = "*"
 schema = "*"
 
 [dev-packages]
 "flake8" = "*"
 pytest = "*"
+pyinstaller = "*"
 
 [requires]
 python_version = "3.12"
