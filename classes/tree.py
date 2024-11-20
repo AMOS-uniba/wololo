@@ -27,7 +27,7 @@ class TreeConvertor(scalyca.Scalyca):
         'ffprobe': Path,
         'older_than': int,
         'video': {
-            'codec': Or('libx264', 'rawvideo'),
+            'codec': Or('libx264', 'rawvideo', 'ffv1'),
             'pixel_format': Or('rgba', 'gray'),
             'convert': Optional(bool),
         },
