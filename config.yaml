@@ -4,5 +4,5 @@ older_than: 30
 source: "C:\\Data\\"
 target: "D:\\Data\\"
 video:
-    codec: rawvideo
+    codec: ffv1
     pixel_format: gray
