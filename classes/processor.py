@@ -62,7 +62,7 @@ class FileProcessor:
         return 0
 
     def convert_avi(self, source, target, *,
-                    codec: str = 'rawvideo',
+                    codec: str = 'ffv1',
                     pixel_format: str = 'gray') -> int:
         """
         Conditionally convert the specified AVI file to the new format using ffmpeg
