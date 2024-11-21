@@ -6,7 +6,6 @@ from pathlib import Path
 from schema import Schema, And, Or, Optional
 
 import sys
-sys.path.append(r"C:\Python\scalyca") # Just for development
 import scalyca
 from scalyca import colour as c
 
@@ -18,7 +17,7 @@ colorama.init()
 
 
 class TreeConvertor(scalyca.Scalyca):
-    _version = '2023-10-20'
+    _version = '2Ö24-11-21'
     _app_name = f"Tree video convertor"
     _schema = Schema({
         'source': And(Path, argparsedirs.ReadableDirType),
@@ -43,8 +42,8 @@ class TreeConvertor(scalyca.Scalyca):
         self.real_run: bool = False
 
     def add_arguments(self):
-        self.add_argument('-s', '--source', type=argparsedirs.ReadableDirType, help="Override <source> directory")
-        self.add_argument('-t', '--target', type=argparsedirs.WriteableDirType, help="Override <target> directory")
+        self.add_argument('-s', '--source', type=Path, help="Override <source> directory")
+        self.add_argument('-t', '--target', type=Path, help="Override <target> directory")
         self.add_argument('-o', '--older-than', type=int,
                           help="Delete files older than this many days. Overrides <older_than>")
         self.add_argument('-C', '--copy', action='store_true', help="Copy or convert files")
@@ -57,12 +56,16 @@ class TreeConvertor(scalyca.Scalyca):
         self.config.ffmpeg = Path(self.config.ffmpeg)
         self.config.ffprobe = Path(self.config.ffprobe)
 
-        if self.args.convert_video:
-            self.config.video.convert = True
+        if self.args.source:
+            self.source_dir = self.args.source
+            
+        if self.args.target:
+            self.target_dir = self.args.target
 
         if self.args.older_than:
             self.config.older_than = self.args.older_than
 
+        self.config.video.convert = True if self.args.convert_video else False
         self.config.copy_files = True if self.args.copy else False
         self.config.delete_files = True if self.args.delete else False
         self.real_run = self.config.copy_files or self.config.delete_files
@@ -86,6 +89,8 @@ class TreeConvertor(scalyca.Scalyca):
 
     def main(self):
         start = datetime.datetime.now(datetime.UTC)
+        self.override_configuration()
+        self.initialize()
         files = self.source_dir.rglob('*.*')
         processed: int = 0
         process_failed: int = 0
@@ -159,7 +164,7 @@ class TreeConvertor(scalyca.Scalyca):
                  f"({(c.ok if process_failed == 0 else c.err)(process_failed)} failed)")
         log.info(f"     - {c.num(f'{reclaimed_size:_d}')} B reclaimed by reencoding")
         log.info(f"  - {c.num(deleted)} ({c.num(f'{deleted_size:_d}')} B) "
-                 f"{'to delete' if self.real_run else 'deleted'} "
+                 f"{'deleted' if self.real_run else 'to delete'} "
                  f"({(c.ok if delete_failed == 0 else c.err)(delete_failed)} failed)")
 
         if not self.real_run:
