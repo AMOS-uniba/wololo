@@ -1,5 +1,4 @@
 import argparsedirs
-import argparse
 import datetime
 import logging
 import colorama
@@ -59,10 +58,10 @@ class TreeConvertor(scalyca.Scalyca):
 
         if self.args.source:
             self.source_dir = self.args.source
-            
+
         if self.args.target:
             self.target_dir = self.args.target
-        
+
         if self.args.older_than:
             self.config.older_than = self.args.older_than
 
