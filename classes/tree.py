@@ -1,4 +1,5 @@
 import argparsedirs
+import argparse
 import datetime
 import logging
 import colorama
@@ -61,7 +62,7 @@ class TreeConvertor(scalyca.Scalyca):
             
         if self.args.target:
             self.target_dir = self.args.target
-
+        
         if self.args.older_than:
             self.config.older_than = self.args.older_than
 
@@ -72,6 +73,12 @@ class TreeConvertor(scalyca.Scalyca):
 
     def initialize(self):
         log.info(f"{self._app_name}, version {self._version}")
+
+        try:
+            argparsedirs.ReadableDirType(self.source_dir)
+        except:
+            raise scalyca.exceptions.ConfigurationError(f"Source directory {c.path(self.source_dir)} does not exist")
+        
         log.info(f"Source directory {c.path(str(self.source_dir))}, "
                  f"target directory {c.path(str(self.target_dir))}")
 
