@@ -76,7 +76,7 @@ class FileProcessor:
 
         loglevel = 32 if self.debug else 24
         command = [
-            self.ffmpeg,
+            str(self.ffmpeg),
             "-hide_banner",  # do not show config every time
             "-y",  # automatically answer "yes" to all questions
             "-i", str(source),  # input file
