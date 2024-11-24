@@ -5,8 +5,7 @@ import colorama
 from pathlib import Path
 from schema import Schema, And, Or, Optional
 
-import scalyca
-from scalyca import colour as c
+from scalyca import colour as c, Scalyca
 
 from classes.processor import FileProcessor
 from utils.functions import format_boolean
@@ -15,7 +14,7 @@ log = logging.getLogger(__name__)
 colorama.init()
 
 
-class TreeConvertor(scalyca.Scalyca):
+class TreeConvertor(Scalyca):
     _version = '2Ö24-11-21'
     _prog = "Wololo"
     _schema = Schema({
@@ -50,7 +49,7 @@ class TreeConvertor(scalyca.Scalyca):
         self.add_argument('-V', '--convert-video', action='store_true', default=False,
                           help="Convert video files")
 
-    def _override_configuration(self):
+    def override_configuration(self):
         self.config.source = Path(self.config.source)
         self.config.target = Path(self.config.target)
         self.config.ffmpeg = Path(self.config.ffmpeg)
@@ -117,7 +116,7 @@ class TreeConvertor(scalyca.Scalyca):
                 should_process = not is_copied or is_updated and self.config.copy_files
                 should_delete = is_old and is_copied and self.config.delete_files
 
-                log.info(f"age {c.num(source_age.days):>13} d, "
+                log.info(f"File age {c.num(source_age.days):>13} d, "
                          f"old: {format_boolean(is_old)} "
                          f"copied: {format_boolean(is_copied)} "
                          f"newer: {format_boolean(is_updated)} "

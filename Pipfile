@@ -9,6 +9,8 @@ argparsedirs = "*"
 dotmap = "*"
 colorama = "*"
 schema = "*"
+scalyca = "*"
+setuptools = "*"
 
 [dev-packages]
 "flake8" = "*"
