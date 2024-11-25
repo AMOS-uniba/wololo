@@ -3,6 +3,8 @@ import datetime
 import logging
 import colorama
 from pathlib import Path
+
+import scalyca.exceptions
 from schema import Schema, And, Or, Optional
 
 from scalyca import colour as c, Scalyca
@@ -15,7 +17,7 @@ colorama.init()
 
 
 class TreeConvertor(Scalyca):
-    _version = '2Ö24-11-21'
+    _version = '2Ö24-11-25'
     _prog = "Wololo"
     _schema = Schema({
         'source': And(Path, argparsedirs.ReadableDirType),
@@ -38,8 +40,10 @@ class TreeConvertor(Scalyca):
         self.real_run: bool = False
 
     def add_arguments(self):
-        self.add_argument('-s', '--source', type=argparsedirs.ReadableDirType, help="Override <source> directory")
-        self.add_argument('-t', '--target', type=argparsedirs.WriteableDirType, help="Override <target> directory")
+        self.add_argument('-s', '--source', type=argparsedirs.ReadableDirType,
+                          help="Override <source> directory")
+        self.add_argument('-t', '--target', type=argparsedirs.WriteableDirType,
+                          help="Override <target> directory")
         self.add_argument('-o', '--older-than', type=int,
                           help="Delete files older than this many days. Overrides <older_than>")
         self.add_argument('-C', '--copy', action='store_true', default=False,
@@ -50,8 +54,17 @@ class TreeConvertor(Scalyca):
                           help="Convert video files")
 
     def override_configuration(self):
+        if self.args.source:
+            self.config.source = self.args.source
         self.config.source = Path(self.config.source)
+
+        if self.args.target:
+            self.config.target = self.args.target
         self.config.target = Path(self.config.target)
+
+        if self.config.source == self.config.target:
+            raise scalyca.exceptions.ConfigurationError("Source and target may not be the same!")
+
         self.config.ffmpeg = Path(self.config.ffmpeg)
         self.config.ffprobe = Path(self.config.ffprobe)
 

@@ -5,11 +5,11 @@ name = "pypi"
 
 [packages]
 pyyaml = "*"
-argparsedirs = "*"
+argparsedirs = ">=0.1.2"
 dotmap = "*"
 colorama = "*"
 schema = "*"
-scalyca = "*"
+scalyca = ">=0.2.3"
 setuptools = "*"
 
 [dev-packages]
@@ -18,4 +18,4 @@ pytest = "*"
 pyinstaller = "*"
 
 [requires]
-python_version = "3.12"
+python_version = "3.11"
