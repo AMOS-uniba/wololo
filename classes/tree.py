@@ -3,11 +3,11 @@ import datetime
 import logging
 import colorama
 from pathlib import Path
+
+import scalyca.exceptions
 from schema import Schema, And, Or, Optional
 
-import sys
-import scalyca
-from scalyca import colour as c
+from scalyca import colour as c, Scalyca
 
 from classes.processor import FileProcessor
 from utils.functions import format_boolean
@@ -16,9 +16,9 @@ log = logging.getLogger(__name__)
 colorama.init()
 
 
-class TreeConvertor(scalyca.Scalyca):
-    _version = '2Ö24-11-21'
-    _app_name = f"Tree video convertor"
+class TreeConvertor(Scalyca):
+    _version = '2Ö24-11-25'
+    _prog = "Wololo"
     _schema = Schema({
         'source': And(Path, argparsedirs.ReadableDirType),
         'target': And(Path, argparsedirs.WriteableDirType),
@@ -36,50 +36,50 @@ class TreeConvertor(scalyca.Scalyca):
 
     def __init__(self):
         super().__init__()
-        self.processor: Optional(FileProcessor) = None
-        self.source_dir: Path | None = None
-        self.target_dir: Path | None = None
+        self.processor: FileProcessor = None
         self.real_run: bool = False
 
     def add_arguments(self):
-        self.add_argument('-s', '--source', type=Path, help="Override <source> directory")
-        self.add_argument('-t', '--target', type=Path, help="Override <target> directory")
+        self.add_argument('-s', '--source', type=argparsedirs.ReadableDirType,
+                          help="Override <source> directory")
+        self.add_argument('-t', '--target', type=argparsedirs.WriteableDirType,
+                          help="Override <target> directory")
         self.add_argument('-o', '--older-than', type=int,
                           help="Delete files older than this many days. Overrides <older_than>")
-        self.add_argument('-C', '--copy', action='store_true', help="Copy or convert files")
-        self.add_argument('-D', '--delete', action='store_true', help="Delete files older than <older_than>")
-        self.add_argument('-V', '--convert-video', action='store_true', help="Convert video files")
+        self.add_argument('-C', '--copy', action='store_true', default=False,
+                          help="Copy or convert files")
+        self.add_argument('-D', '--delete', action='store_true', default=False,
+                          help="Delete files older than <older_than>")
+        self.add_argument('-V', '--convert-video', action='store_true', default=False,
+                          help="Convert video files")
 
     def override_configuration(self):
-        self.source_dir = Path(self.config.source)
-        self.target_dir = Path(self.config.target)
+        if self.args.source:
+            self.config.source = self.args.source
+        self.config.source = Path(self.config.source)
+
+        if self.args.target:
+            self.config.target = self.args.target
+        self.config.target = Path(self.config.target)
+
+        if self.config.source == self.config.target:
+            raise scalyca.exceptions.ConfigurationError("Source and target may not be the same!")
+
         self.config.ffmpeg = Path(self.config.ffmpeg)
         self.config.ffprobe = Path(self.config.ffprobe)
 
-        if self.args.source:
-            self.source_dir = self.args.source
-
-        if self.args.target:
-            self.target_dir = self.args.target
+        self.config.copy_files = self.args.copy
+        self.config.delete_files = self.args.delete
+        self.config.video.convert = self.args.convert_video
 
         if self.args.older_than:
             self.config.older_than = self.args.older_than
 
-        self.config.video.convert = True if self.args.convert_video else False
-        self.config.copy_files = True if self.args.copy else False
-        self.config.delete_files = True if self.args.delete else False
         self.real_run = self.config.copy_files or self.config.delete_files
 
     def initialize(self):
-        log.info(f"{self._app_name}, version {self._version}")
-
-        try:
-            argparsedirs.ReadableDirType(self.source_dir)
-        except:
-            raise scalyca.exceptions.ConfigurationError(f"Source directory {c.path(self.source_dir)} does not exist")
-        
-        log.info(f"Source directory {c.path(str(self.source_dir))}, "
-                 f"target directory {c.path(str(self.target_dir))}")
+        log.info(f"Source directory {c.path(str(self.config.source))}, "
+                 f"target directory {c.path(str(self.config.target))}")
 
         if self.config.video.convert:
             log.info(f"Videos will be converted to {c.param(self.config.video.codec)}, "
@@ -95,9 +95,7 @@ class TreeConvertor(scalyca.Scalyca):
 
     def main(self):
         start = datetime.datetime.now(datetime.UTC)
-        self.override_configuration()
-        self.initialize()
-        files = self.source_dir.rglob('*.*')
+        files = self.config.source.rglob('*.*')
         processed: int = 0
         process_failed: int = 0
         processed_size: int = 0
@@ -110,7 +108,7 @@ class TreeConvertor(scalyca.Scalyca):
 
         for file in sorted(files):
             source_path = Path(file)
-            target_dir = Path(str(file.parent).replace(str(self.source_dir), str(self.target_dir)))
+            target_dir = Path(str(file.parent).replace(str(self.config.source), str(self.config.target)))
             target_path = Path(target_dir / file.name)
             try:
                 source_age = datetime.datetime.now(datetime.UTC) - \
@@ -131,12 +129,13 @@ class TreeConvertor(scalyca.Scalyca):
                 should_process = not is_copied or is_updated and self.config.copy_files
                 should_delete = is_old and is_copied and self.config.delete_files
 
-                log.info(f"{c.path(file):<85} age {c.num(source_age.days):>13} d, "
+                log.info(f"File age {c.num(source_age.days):>13} d, "
                          f"old: {format_boolean(is_old)} "
                          f"copied: {format_boolean(is_copied)} "
                          f"newer: {format_boolean(is_updated)} "
                          f"process: {format_boolean(should_process)}, "
-                         f"delete: {format_boolean(should_delete)}")
+                         f"delete: {format_boolean(should_delete)}, "
+                         f"name: {c.path(file):<85}")
 
                 if should_process:
                     try:
