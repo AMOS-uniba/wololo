@@ -111,12 +111,12 @@
         },
         "scalyca": {
             "hashes": [
-                "sha256:05b6135eada0e4dfb588cf8f5c3bcc6969cd86fcadf3832cc9dbffbf9bfe3320",
-                "sha256:62ba13d620892cd13393f6813ffdc7b76de04fc8eb623b16f1ae936cb312d6f3"
+                "sha256:1d63fb19dbf500bffbf6576a0c3cc1bdf32069e60ecab463f421977f0a9a22b4",
+                "sha256:c009f995d69713ce4e31b62537d2cd27aac1bf9e6e38c4a5330b3ed1c5759c8c"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.12' and python_version < '4.0'",
-            "version": "==0.2.3"
+            "version": "==0.2.4"
         },
         "schema": {
             "hashes": [

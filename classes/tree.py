@@ -36,7 +36,7 @@ class TreeConvertor(Scalyca):
 
     def __init__(self):
         super().__init__()
-        self.processor: FileProcessor = None
+        self.processor: FileProcessor | None = None
         self.real_run: bool = False
 
     def add_arguments(self):
@@ -94,7 +94,6 @@ class TreeConvertor(Scalyca):
         self.processor = FileProcessor(self.real_run, ffmpeg_path=self.config.ffmpeg, debug=self.args.debug)
 
     def main(self):
-        start = datetime.datetime.now(datetime.UTC)
         files = self.config.source.rglob('*.*')
         processed: int = 0
         process_failed: int = 0
@@ -174,8 +173,6 @@ class TreeConvertor(Scalyca):
 
         if not self.real_run:
             log.info(f"This was a {c.warn('dry run')}, no files were actually copied or deleted")
-
-        log.info(f"Finished in {datetime.datetime.now(datetime.UTC) - start}")
 
     def delete(self, path):
         """ Conditionally delete the specified file """
