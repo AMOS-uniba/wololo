@@ -9,7 +9,7 @@ argparsedirs = ">=0.1.2"
 dotmap = "*"
 colorama = "*"
 schema = "*"
-scalyca = ">=0.2.3"
+scalyca = ">=0.2.4"
 setuptools = "*"
 
 [dev-packages]
@@ -18,4 +18,4 @@ pytest = "*"
 pyinstaller = "*"
 
 [requires]
-python_version = "3.11"
+python_version = "3.12"
